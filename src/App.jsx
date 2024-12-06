@@ -18,17 +18,39 @@ const useField = (type) => {
 const useCountry = (name) => {
   const [country, setCountry] = useState(null)
 
-  useEffect(() => {})
+  useEffect(() => {
+    if (name) {
+      fetch(`https://studies.cs.helsinki.fi/restcountries/api/name/${name}`)
+        .then(response => {
+          // Check if the response is OK (status code 200-299)
+          if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+          }
+          // Parse the JSON from the response
+          return response.json();
+        })
+        .then(data => {
+          // Handle the parsed data
+          console.log(data);
+          setCountry({
+            name: data.name.common,
+            capital: data.capital[0],
+            population: data.population,
+            flag: data.flags.png
+
+          });
+        })
+        .catch(error => {
+          setCountry(undefined);
+        });
+    }
+  }, [name]);
 
   return country
 }
 
 const Country = ({ country }) => {
   if (!country) {
-    return null
-  }
-
-  if (!country.found) {
     return (
       <div>
         not found...
@@ -38,10 +60,10 @@ const Country = ({ country }) => {
 
   return (
     <div>
-      <h3>{country.data.name} </h3>
-      <div>capital {country.data.capital} </div>
-      <div>population {country.data.population}</div> 
-      <img src={country.data.flag} height='100' alt={`flag of ${country.data.name}`}/>  
+      <h3>{country.name} </h3>
+      <div>capital {country.capital} </div>
+      <div>population {country.population}</div>
+      <img src={country.flag} height='100' alt={`flag of ${country.name}`} />
     </div>
   )
 }
